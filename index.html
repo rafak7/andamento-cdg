@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Andamento | CDG Fitness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --v4-red: #c92c93;
+      --v4-red-hover: #981a6b;
+      --v4-orange: #f477c8;
+      --v4-flame: #ed74c7;
+      --v4-dark: #2b061d;
+      --v4-darker: #171116;
+      --v4-grey: #e3d9e0;
+      --v4-white: #ffffff;
+      --v4-cream: #ffceed;
+      --v4-salmon: #ff84d2;
+      --ink: #111111;
+      --ink-soft: #625861;
+      --line: rgba(23, 17, 22, .12);
+      --radius: 8px;
+      --radius-pill: 999px;
+      --hero: radial-gradient(120% 130% at 50% -10%, #ff84d2 0%, #c92c93 32%, #981a6b 62%, #2b061d 100%);
+      --success: #126a43;
+      --warning: #8a5200;
+      --danger: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #171313;
+      color: var(--ink);
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+
+    button { font-family: inherit; }
+
+    #viewport {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 10%, rgba(201, 44, 147, .18), transparent 38%),
+        #171116;
+    }
+
+    #deck {
+      --deck-scale: 1;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 1600px;
+      height: 900px;
+      overflow: hidden;
+      transform: translate(-50%, -50%) scale(var(--deck-scale));
+      transform-origin: center;
+      background: #f5f4f2;
+      box-shadow: 0 40px 120px rgba(0, 0, 0, .45);
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 1600px;
+      height: 900px;
+      padding: 76px 96px 108px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(24px);
+      transition: opacity .28s ease, transform .28s ease;
+      background:
+        radial-gradient(circle at 92% 8%, rgba(201, 44, 147, .08), transparent 24%),
+        #f7f4f7;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .slide.red {
+      color: white;
+      background: var(--hero);
+    }
+
+    .slide.dark {
+      color: white;
+      background:
+        radial-gradient(circle at 78% 15%, rgba(201, 44, 147, .48), transparent 32%),
+        linear-gradient(145deg, #2b061d 0%, #171116 100%);
+    }
+
+    .slide.white { background: white; }
+
+    .topline {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--v4-red), var(--v4-orange), transparent 76%);
+    }
+
+    h1,
+    h2,
+    h3,
+    p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 24px;
+      font-size: 88px;
+      line-height: .98;
+      letter-spacing: -.055em;
+      font-weight: 600;
+    }
+
+    h2 {
+      margin-bottom: 18px;
+      font-size: 60px;
+      line-height: 1.02;
+      letter-spacing: -.045em;
+      font-weight: 600;
+    }
+
+    h3 {
+      margin-bottom: 10px;
+      font-size: 26px;
+      line-height: 1.1;
+      letter-spacing: -.025em;
+      font-weight: 600;
+    }
+
+    .lede {
+      max-width: 1000px;
+      color: var(--ink-soft);
+      font-size: 27px;
+      line-height: 1.42;
+      font-weight: 300;
+    }
+
+    .red .lede,
+    .dark .lede { color: rgba(255, 255, 255, .72); }
+
+    .accent { color: var(--v4-red); }
+    .red .accent,
+    .dark .accent { color: var(--v4-cream); }
+
+    .mono { font-family: "IBM Plex Mono", monospace; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 7px 15px;
+      border: 1px solid rgba(201, 44, 147, .18);
+      border-radius: var(--radius-pill);
+      color: var(--v4-red);
+      background: rgba(201, 44, 147, .08);
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .red .eyebrow,
+    .dark .eyebrow {
+      color: rgba(255, 255, 255, .92);
+      background: rgba(255, 255, 255, .06);
+      border-color: rgba(255, 255, 255, .35);
+      box-shadow:
+        inset 0 0 80px rgba(255, 255, 255, .12),
+        inset 0 1px 8px rgba(255, 255, 255, .35),
+        -5px 5px 20px rgba(0, 0, 0, .10);
+      backdrop-filter: blur(14px) saturate(140%);
+    }
+
+    .card {
+      position: relative;
+      padding: 28px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: white;
+    }
+
+    .glass {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .35);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .06);
+      box-shadow:
+        inset 0 0 150px rgba(255, 255, 255, .13),
+        inset 0 1px 10px rgba(255, 255, 255, .38),
+        inset 0 -2px 10px rgba(255, 255, 255, .22),
+        inset 0 0 100px rgba(255, 255, 255, .08),
+        -5px 5px 20px rgba(0, 0, 0, .10);
+      backdrop-filter: blur(14px) saturate(140%);
+    }
+
+    .glass::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background:
+        radial-gradient(120% 90% at 50% 115%, rgba(255, 170, 80, .34), transparent 55%),
+        linear-gradient(180deg, rgba(255, 255, 255, .22), transparent 40%);
+      mix-blend-mode: screen;
+    }
+
+    .sphere {
+      position: absolute;
+      border: 1px solid rgba(255, 255, 255, .24);
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .38), rgba(255, 255, 255, .045) 48%, transparent 66%);
+      box-shadow:
+        inset 0 0 120px rgba(255, 255, 255, .13),
+        inset 25px 18px 70px rgba(244, 119, 200, .28);
+      backdrop-filter: blur(3px);
+    }
+
+    .watermark {
+      position: absolute;
+      z-index: 1;
+      right: -60px;
+      bottom: 40px;
+      width: 720px;
+      opacity: .08;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .red .watermark,
+    .dark .watermark { opacity: .12; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .status-ok { color: var(--success); background: rgba(18, 106, 67, .1); }
+    .status-mid { color: var(--warning); background: rgba(138, 82, 0, .1); }
+    .status-off { color: var(--danger); background: rgba(180, 35, 24, .1); }
+
+    .step {
+      position: relative;
+      min-height: 248px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .step-num {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--v4-red);
+    }
+
+    .icon {
+      width: 30px;
+      height: 30px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .icon-box {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border: 1px solid rgba(201, 44, 147, .18);
+      border-radius: 8px;
+      color: var(--v4-red);
+      background: rgba(201, 44, 147, .08);
+    }
+
+    .red .icon-box,
+    .dark .icon-box {
+      color: white;
+      border-color: rgba(255, 255, 255, .28);
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+
+    .big-number {
+      color: var(--v4-red);
+      font-size: 72px;
+      line-height: 1;
+      letter-spacing: -.06em;
+      font-weight: 700;
+    }
+
+    .metric-label {
+      margin-top: 8px;
+      color: var(--ink-soft);
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .bullet-list {
+      display: grid;
+      gap: 16px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .bullet-list.two {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .bullet-list li {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-height: 108px;
+      padding: 18px 20px;
+      border: 1px solid rgba(20, 20, 20, .08);
+      border-radius: 17px;
+      background: rgba(255, 255, 255, .74);
+      font-size: 21px;
+      line-height: 1.2;
+    }
+
+    .hub-layout {
+      position: relative;
+      height: 540px;
+      isolation: isolate;
+    }
+
+    .hub-line {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 420px;
+      height: 420px;
+      border: 1px dashed rgba(229, 9, 20, .26);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .hub {
+      position: absolute;
+      z-index: 3;
+      left: 50%;
+      top: 50%;
+      width: 240px;
+      height: 240px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      background: var(--hero);
+      box-shadow: 0 30px 80px rgba(229, 9, 20, .3);
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .hub-node {
+      position: absolute;
+      z-index: 2;
+      width: 240px;
+      min-height: 110px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px;
+      animation: node-float 5.2s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    .node-nw { left: 65px; top: 38px; animation-delay: -.6s; }
+    .node-ne { right: 65px; top: 38px; animation-delay: -1.8s; }
+    .node-sw { left: 65px; bottom: 38px; animation-delay: -2.8s; }
+    .node-se { right: 65px; bottom: 38px; animation-delay: -3.8s; }
+
+    .cover-content {
+      position: relative;
+      z-index: 3;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+    }
+
+    .brand-lockup img {
+      width: 330px;
+      display: block;
+      object-fit: contain;
+    }
+
+    .cover-title {
+      max-width: 1100px;
+      margin: 28px 0 0;
+      font-size: 92px;
+    }
+
+    .slide-footer {
+      position: absolute;
+      z-index: 8;
+      left: 96px;
+      right: 96px;
+      bottom: 32px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .slide-footer img {
+      width: 155px;
+      height: 48px;
+      object-fit: contain;
+      object-position: left center;
+    }
+
+    .navigation {
+      position: absolute;
+      z-index: 20;
+      right: 52px;
+      bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(20, 20, 20, .12);
+      border-radius: 50%;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .92);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease, opacity .15s ease;
+    }
+
+    .nav-btn:hover { transform: translateY(-2px); background: white; }
+    .nav-btn:disabled { opacity: .3; cursor: default; transform: none; }
+
+    .progress-track {
+      position: absolute;
+      z-index: 21;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 7px;
+      background: rgba(20, 20, 20, .1);
+    }
+
+    .progress-fill {
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--v4-red), var(--v4-orange));
+      box-shadow: 0 0 20px rgba(201, 44, 147, .35);
+      transition: width .3s ease;
+    }
+
+    .slide-counter {
+      position: absolute;
+      z-index: 22;
+      right: 176px;
+      bottom: 39px;
+      color: rgba(20, 20, 20, .52);
+      font: 500 12px/1 "IBM Plex Mono", monospace;
+      letter-spacing: .04em;
+    }
+
+    @keyframes node-float {
+      0%, 100% { transform: var(--node-base, translate(0, 0)) translateY(0) rotate(0deg); }
+      25% { transform: var(--node-base, translate(0, 0)) translateY(-9px) rotate(-1.5deg); }
+      50% { transform: var(--node-base, translate(0, 0)) translateY(3px) rotate(1deg); }
+      75% { transform: var(--node-base, translate(0, 0)) translateY(-5px) rotate(.5deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg aria-hidden="true" width="0" height="0" style="position:absolute">
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-brand" viewBox="0 0 24 24"><path d="M4 18V6l8-3 8 3v12l-8 3-8-3Z"/><path d="M9 9h6M9 13h6M9 17h3"/></symbol>
+    <symbol id="i-store" viewBox="0 0 24 24"><path d="M3 10h18"/><path d="M5 10v10h14V10"/><path d="m4 4-1 6h18l-1-6H4Z"/><path d="M9 20v-6h6v6"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/><path d="m3 8 6-6m12 6-6-6M3 16l6 6m12-6-6 6"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/><path d="M2 19h21"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M9 19h2a4 4 0 0 0 4-4v-6"/></symbol>
+    <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="m3 11 14-6v14L3 13v-2Z"/><path d="M11 16v4H7l-1-6"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3-9 5 9 5 9-5-9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 16 9 5 9-5"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+    <symbol id="i-brush" viewBox="0 0 24 24"><path d="m14 4 6 6-8 8H6v-6l8-8Z"/><path d="M4 20h8"/></symbol>
+    <symbol id="i-page" viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6V2Z"/><path d="M14 2v5h5M9 12h6M9 16h6"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><circle cx="18" cy="9" r="3"/><path d="M2 21c0-5 3-8 7-8s7 3 7 8M16 14c4 0 6 2 6 7"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></symbol>
+    <symbol id="i-sale" viewBox="0 0 24 24"><path d="M4 6h16l-2 12H6L4 6Z"/><path d="M8 6a4 4 0 0 1 8 0"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M4 4h16v13H8l-4 4V4Z"/><path d="M8 9h8M8 13h5"/></symbol>
+    <symbol id="i-dashboard" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 10h18M10 10v11"/><path d="m14 16 2-2 2 2"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="m13 2-8 12h7l-1 8 8-12h-7l1-8Z"/></symbol>
+    <symbol id="i-lightbulb" viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M8 14c-2-1-3-3-3-6a7 7 0 0 1 14 0c0 3-1 5-3 6l-1 2H9l-1-2Z"/></symbol>
+    <symbol id="i-money" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M7 9H5v2M17 15h2v-2"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-9"/><path d="M16 6h5v5"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 7h11v10H3z"/><path d="M14 10h4l3 3v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 7 9-7"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="5"/><path d="M12 13h9v4h-3v-2"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></symbol>
+  </svg>
+
+  <div id="viewport">
+    <main id="deck" aria-live="polite">
+      <section class="slide red active" data-title="Andamento da loja">
+        <img class="watermark" src="assets/colli-white.png" alt="">
+        <div class="sphere" style="width:430px;height:430px;right:-80px;top:-115px;opacity:.55"></div>
+        <div class="sphere" style="width:245px;height:245px;right:285px;top:115px;opacity:.32"></div>
+        <div class="cover-content">
+          <div class="brand-lockup">
+            <img src="assets/cdg-logo.svg" alt="CDG Fitness" style="width:160px;height:auto">
+            <img src="assets/colli-white.png" alt="V4 Company">
+          </div>
+          <div>
+            <span class="eyebrow">E-commerce Shopify</span>
+            <h1 class="cover-title">Andamento da<br>loja CDG Fitness</h1>
+            <p class="lede">O que já está no ar, o que ainda é parcial e o que falta para operar de ponta a ponta. Leitura de 6 de outubro de 2026.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Situação da loja">
+        <img class="watermark" src="assets/colli-red.png" alt="">
+        <div class="topline"></div>
+        <span class="eyebrow">Panorama</span>
+        <h2 style="margin-top:22px">Três estados da<br>loja publicada</h2>
+        <div class="grid-3" style="margin-top:36px">
+          <div class="card" style="min-height:430px">
+            <div class="big-number" style="color:var(--success)">6</div>
+            <h3 style="margin-top:18px">Prontas</h3>
+            <p class="lede" style="font-size:20px;max-width:none">A função existe na loja e a compradora consegue usar.</p>
+          </div>
+          <div class="card" style="min-height:430px">
+            <div class="big-number" style="color:var(--warning)">4</div>
+            <h3 style="margin-top:18px">Parciais</h3>
+            <p class="lede" style="font-size:20px;max-width:none">Aparece na vitrine, mas ainda não fecha no checkout ou na entrega.</p>
+          </div>
+          <div class="card" style="min-height:430px">
+            <div class="big-number" style="color:var(--danger)">4</div>
+            <h3 style="margin-top:18px">Pendentes</h3>
+            <p class="lede" style="font-size:20px;max-width:none">Dependem de conta, contrato, token ou de um pedido pago de teste.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide red" data-title="O que já compra">
+        <img class="watermark" src="assets/colli-white.png" alt="">
+        <div class="sphere" style="width:380px;height:380px;right:-70px;bottom:-90px;opacity:.4"></div>
+        <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center">
+          <span class="eyebrow">Situação atual</span>
+          <h2 style="max-width:1240px;margin-top:28px;font-size:68px">A compradora navega, escolhe a peça e paga com PIX, cartão ou PayPal.</h2>
+          <p class="lede" style="margin-top:12px">O checkout já cobra pelos três meios. O 10% escrito no PIX e o 3x na vitrine ainda não mudam o valor sozinhos. O 5% na primeira compra entra no checkout.</p>
+        </div>
+      </section>
+
+      <section class="slide" data-title="O que já está no ar">
+        <img class="watermark" src="assets/colli-red.png" alt="">
+        <div class="topline"></div>
+        <span class="eyebrow">Pronto</span>
+        <h2 style="margin-top:18px">O que a loja já entrega</h2>
+        <div class="grid-3" style="margin-top:28px">
+          <div class="card" style="min-height:210px">
+            <div class="icon-box"><svg class="icon"><use href="#i-store"></use></svg></div>
+            <h3 style="margin-top:18px">Home e navegação</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px;line-height:1.4">Home, menu, busca e carrinho no celular, com o tema CDG Fitness publicado.</p>
+          </div>
+          <div class="card" style="min-height:210px">
+            <div class="icon-box"><svg class="icon"><use href="#i-search"></use></svg></div>
+            <h3 style="margin-top:18px">Catálogo</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px;line-height:1.4">Coleções, filtros, ordenação e página de produto com cor, tamanho e estoque.</p>
+          </div>
+          <div class="card" style="min-height:210px">
+            <div class="icon-box"><svg class="icon"><use href="#i-sale"></use></svg></div>
+            <h3 style="margin-top:18px">Sacola e cupom</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px;line-height:1.4">Quantidade, remoção, cupom e ida ao checkout. O cupom vale se existir no admin.</p>
+          </div>
+          <div class="card" style="min-height:210px">
+            <div class="icon-box"><svg class="icon"><use href="#i-money"></use></svg></div>
+            <h3 style="margin-top:18px">PIX, cartão e PayPal</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px;line-height:1.4">O checkout cobra pelos três meios, com Mercado Pago ativo.</p>
+          </div>
+          <div class="card" style="min-height:210px">
+            <div class="icon-box"><svg class="icon"><use href="#i-page"></use></svg></div>
+            <h3 style="margin-top:18px">Páginas e políticas</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px;line-height:1.4">Sobre, contato, FAQ, entrega, trocas em 7 dias corridos, privacidade e cookies.</p>
+          </div>
+          <div class="card" style="min-height:210px">
+            <div class="icon-box"><svg class="icon"><use href="#i-check"></use></svg></div>
+            <h3 style="margin-top:18px">5% primeira compra</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px;line-height:1.4">Desconto automático no checkout para quem ainda não comprou, com login na conta.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide white" data-title="Jornada da compra">
+        <img class="watermark" src="assets/colli-red.png" alt="">
+        <div class="topline"></div>
+        <span class="eyebrow">Jornada</span>
+        <h2 style="margin-top:18px">Do catálogo ao recebimento</h2>
+        <div class="grid-3" style="margin-top:28px">
+          <div class="card step">
+            <span class="step-num">01</span>
+            <span class="status status-ok">Pronto</span>
+            <h3>Achar a peça</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px">Home, coleções, filtros e busca.</p>
+          </div>
+          <div class="card step">
+            <span class="step-num">02</span>
+            <span class="status status-ok">Pronto</span>
+            <h3>Colocar na sacola</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px">Cor, tamanho, quantidade e botão fixo no celular.</p>
+          </div>
+          <div class="card step">
+            <span class="step-num">03</span>
+            <span class="status status-mid">Parcial</span>
+            <h3>Ver o preço</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px">10% no PIX e 3x sem juros ainda são texto da vitrine.</p>
+          </div>
+          <div class="card step">
+            <span class="step-num">04</span>
+            <span class="status status-mid">Parcial</span>
+            <h3>Calcular o frete</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px">Tarifa Padrão da Shopify, com prazo, somada ao total.</p>
+          </div>
+          <div class="card step">
+            <span class="step-num">05</span>
+            <span class="status status-ok">Pronto</span>
+            <h3>Pagar PIX ou cartão</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px">Mercado Pago cobra PIX e cartão. PayPal também segue no checkout.</p>
+          </div>
+          <div class="card step">
+            <span class="step-num">06</span>
+            <span class="status status-off">Pendente</span>
+            <h3>Receber com rastreio</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:18px">Correios e nota fiscal ficam fora da loja até o token e o contrato.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="O que ainda é parcial">
+        <img class="watermark" src="assets/colli-red.png" alt="">
+        <div class="topline"></div>
+        <span class="eyebrow">Parcial</span>
+        <h2 style="margin-top:18px">Aparece, mas não fecha</h2>
+        <div class="grid-2" style="margin-top:28px">
+          <div class="card" style="min-height:268px;display:flex;gap:18px;align-items:flex-start">
+            <div class="icon-box"><svg class="icon"><use href="#i-truck"></use></svg></div>
+            <div>
+              <h3>Frete</h3>
+              <p style="margin:0;color:var(--ink-soft);font-size:18px;line-height:1.4">O CEP devolve a tarifa Padrão, com prazo. Falta cotação por serviço, etiqueta e rastreio dos Correios.</p>
+            </div>
+          </div>
+          <div class="card" style="min-height:268px;display:flex;gap:18px;align-items:flex-start">
+            <div class="icon-box"><svg class="icon"><use href="#i-bolt"></use></svg></div>
+            <div>
+              <h3>10% no PIX</h3>
+              <p style="margin:0;color:var(--ink-soft);font-size:18px;line-height:1.4">O site mostra o preço com 10% a menos. O checkout cobra o valor cheio.</p>
+            </div>
+          </div>
+          <div class="card" style="min-height:268px;display:flex;gap:18px;align-items:flex-start">
+            <div class="icon-box"><svg class="icon"><use href="#i-card"></use></svg></div>
+            <div>
+              <h3>Parcelamento</h3>
+              <p style="margin:0;color:var(--ink-soft);font-size:18px;line-height:1.4">A página calcula 3x sem juros. A parcela cobrada segue a regra da conta Mercado Pago.</p>
+            </div>
+          </div>
+          <div class="card" style="min-height:268px;display:flex;gap:18px;align-items:flex-start">
+            <div class="icon-box"><svg class="icon"><use href="#i-mail"></use></svg></div>
+            <div>
+              <h3>E-mails do pedido</h3>
+              <p style="margin:0;color:var(--ink-soft);font-size:18px;line-height:1.4">A cor de destaque já é o rosa da CDG. O texto continua o modelo padrão, em inglês, até o remetente ser verificado.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide dark" data-title="Mercado Pago ativo">
+        <img class="watermark" src="assets/colli-white.png" alt="">
+        <div class="sphere" style="width:360px;height:360px;left:-90px;top:-80px;opacity:.28"></div>
+        <div style="position:relative;z-index:2">
+          <span class="eyebrow">Pagamento</span>
+          <h2 style="margin-top:18px">Mercado Pago já<br>cobra na loja</h2>
+          <div class="grid-2" style="margin-top:36px">
+            <div class="glass" style="min-height:360px;padding:32px">
+              <div class="icon-box"><svg class="icon"><use href="#i-card"></use></svg></div>
+              <h3 style="margin-top:20px">Cartões</h3>
+              <p style="margin:0;color:rgba(255,255,255,.78);font-size:20px;line-height:1.45">A compradora paga com cartão no checkout. A parcela segue a regra da conta Mercado Pago.</p>
+            </div>
+            <div class="glass" style="min-height:360px;padding:32px">
+              <div class="icon-box"><svg class="icon"><use href="#i-bolt"></use></svg></div>
+              <h3 style="margin-top:20px">PIX</h3>
+              <p style="margin:0;color:rgba(255,255,255,.78);font-size:20px;line-height:1.45">O PIX já está no checkout. O 10% escrito na vitrine ainda não altera o valor cobrado.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Fila de operação">
+        <img class="watermark" src="assets/colli-red.png" alt="">
+        <div class="topline"></div>
+        <span class="eyebrow">Fila agora</span>
+        <h2 style="margin-top:18px">Ordem para a loja operar</h2>
+        <div class="grid-4" style="margin-top:32px">
+          <div class="card" style="min-height:460px">
+            <div class="icon-box"><svg class="icon"><use href="#i-box"></use></svg></div>
+            <span class="step-num">01</span>
+            <h3 style="margin-top:16px">Estoque e nota</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:17px;line-height:1.4">O script já existe. Falta o token da API do Bling. Sem o conector nativo.</p>
+          </div>
+          <div class="card" style="min-height:460px">
+            <div class="icon-box"><svg class="icon"><use href="#i-truck"></use></svg></div>
+            <span class="step-num">02</span>
+            <h3 style="margin-top:16px">Rastreio</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:17px;line-height:1.4">Contrato e app dos Correios, com código na conta da cliente.</p>
+          </div>
+          <div class="card" style="min-height:460px">
+            <div class="icon-box"><svg class="icon"><use href="#i-mail"></use></svg></div>
+            <span class="step-num">03</span>
+            <h3 style="margin-top:16px">E-mails</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:17px;line-height:1.4">Verificar o remetente, traduzir os avisos e ligar o DNS do domínio.</p>
+          </div>
+          <div class="card" style="min-height:460px">
+            <div class="icon-box"><svg class="icon"><use href="#i-check"></use></svg></div>
+            <span class="step-num">04</span>
+            <h3 style="margin-top:16px">Pedido real</h3>
+            <p style="margin:0;color:var(--ink-soft);font-size:17px;line-height:1.4">Um pagamento de teste, com estoque baixado e e-mail recebido.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide white" data-title="O que destrava cada item">
+        <img class="watermark" src="assets/colli-red.png" alt="">
+        <div class="topline"></div>
+        <span class="eyebrow">Acesso</span>
+        <h2 style="margin-top:18px">O que destrava cada pendência</h2>
+        <ul class="bullet-list two" style="margin-top:32px">
+          <li>
+            <div class="icon-box"><svg class="icon"><use href="#i-key"></use></svg></div>
+            <div>Token do Bling no arquivo .env, com escopos de pedidos, estoques e notas.</div>
+          </li>
+          <li>
+            <div class="icon-box"><svg class="icon"><use href="#i-card"></use></svg></div>
+            <div>Pedido pago de teste para baixar estoque e receber o e-mail.</div>
+          </li>
+          <li>
+            <div class="icon-box"><svg class="icon"><use href="#i-mail"></use></svg></div>
+            <div>Confirmar o e-mail enviado para rafael.linoseabra@v4company.com.</div>
+          </li>
+          <li>
+            <div class="icon-box"><svg class="icon"><use href="#i-truck"></use></svg></div>
+            <div>Contrato dos Correios e um app aprovado. Sem isso não há etiqueta.</div>
+          </li>
+          <li>
+            <div class="icon-box"><svg class="icon"><use href="#i-box"></use></svg></div>
+            <div>Lista fechada de produtos, preços e estoque no lugar do cadastro de homologação.</div>
+          </li>
+          <li>
+            <div class="icon-box"><svg class="icon"><use href="#i-layers"></use></svg></div>
+            <div>SEO e cookies já estão no tema. O evento de compra fica no checkout da Shopify.</div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="slide red" data-title="Próximo passo">
+        <img class="watermark" src="assets/colli-white.png" alt="">
+        <div class="sphere" style="width:430px;height:430px;right:-80px;top:-115px;opacity:.5"></div>
+        <div class="sphere" style="width:220px;height:220px;left:80px;bottom:80px;opacity:.28"></div>
+        <div class="cover-content">
+          <div class="brand-lockup">
+            <img src="assets/cdg-logo.svg" alt="CDG Fitness" style="width:160px;height:auto">
+            <img src="assets/colli-white.png" alt="V4 Company">
+          </div>
+          <div>
+            <span class="eyebrow">Próximo passo</span>
+            <h2 style="font-size:64px;max-width:1180px">Rodar o Bling com o token da CDG e fechar um pedido de teste.</h2>
+            <p class="lede">O pagamento já existe. Falta a nota, o estoque e o e-mail com a marca.</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="slide-footer">
+        <img id="footerLogo" src="assets/colli-red.png" alt="">
+      </div>
+
+      <div class="slide-counter" id="slideCounter">01 / 02</div>
+
+      <nav class="navigation" aria-label="Navegação da apresentação">
+        <button class="nav-btn" id="prevBtn" aria-label="Slide anterior" data-testid="prev-slide">
+          <svg class="icon"><use href="#i-arrow-left"></use></svg>
+        </button>
+        <button class="nav-btn" id="nextBtn" aria-label="Próximo slide" data-testid="next-slide">
+          <svg class="icon"><use href="#i-arrow-right"></use></svg>
+        </button>
+      </nav>
+
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const deck = document.getElementById("deck");
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const progressFill = document.getElementById("progressFill");
+    const slideCounter = document.getElementById("slideCounter");
+    const footerLogo = document.getElementById("footerLogo");
+    let current = 0;
+
+    function fitDeck() {
+      const viewportWidth =
+        window.visualViewport?.width ||
+        document.documentElement.clientWidth ||
+        window.innerWidth;
+      const viewportHeight =
+        window.visualViewport?.height ||
+        document.documentElement.clientHeight ||
+        window.innerHeight;
+      const scale = Math.max(
+        .1,
+        Math.min(
+          (viewportWidth - 16) / 1600,
+          (viewportHeight - 16) / 900,
+          1
+        )
+      );
+      deck.style.setProperty("--deck-scale", scale);
+    }
+
+    function goTo(index) {
+      current = Math.max(0, Math.min(slides.length - 1, index));
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle("active", slideIndex === current);
+      });
+
+      const number = String(current + 1).padStart(2, "0");
+      const total = String(slides.length).padStart(2, "0");
+      const activeSlide = slides[current];
+      const isDark =
+        activeSlide.classList.contains("red") ||
+        activeSlide.classList.contains("dark");
+
+      slideCounter.textContent = `${number} / ${total}`;
+      slideCounter.style.color = isDark
+        ? "rgba(255,255,255,.58)"
+        : "rgba(20,20,20,.52)";
+      progressFill.style.width = `${((current + 1) / slides.length) * 100}%`;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === slides.length - 1;
+      footerLogo.src = isDark
+        ? "assets/colli-white.png"
+        : "assets/colli-red.png";
+      footerLogo.style.opacity =
+        current === 0 || current === slides.length - 1 ? "0" : "1";
+      document.title =
+        `${number} | ${activeSlide.dataset.title || "Apresentação"}`;
+    }
+
+    prevBtn.addEventListener("click", () => goTo(current - 1));
+    nextBtn.addEventListener("click", () => goTo(current + 1));
+    window.addEventListener("resize", fitDeck);
+    window.visualViewport?.addEventListener("resize", fitDeck);
+    window.addEventListener("keydown", (event) => {
+      if (["ArrowRight", "PageDown", " "].includes(event.key)) {
+        event.preventDefault();
+        goTo(current + 1);
+      }
+      if (["ArrowLeft", "PageUp"].includes(event.key)) {
+        event.preventDefault();
+        goTo(current - 1);
+      }
+      if (event.key === "Home") goTo(0);
+      if (event.key === "End") goTo(slides.length - 1);
+    });
+
+    let touchStartX = null;
+    deck.addEventListener("touchstart", (event) => {
+      touchStartX = event.changedTouches[0].clientX;
+    }, { passive: true });
+    deck.addEventListener("touchend", (event) => {
+      if (touchStartX === null) return;
+      const delta = event.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(delta) > 70) {
+        goTo(current + (delta < 0 ? 1 : -1));
+      }
+      touchStartX = null;
+    }, { passive: true });
+
+    fitDeck();
+    goTo(0);
+  </script>
+</body>
+</html>
